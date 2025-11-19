@@ -48,18 +48,11 @@ document.addEventListener('paste', (event) => {
         // 如果粘贴的是图片
         if (item.kind === 'file' && item.type.includes('image/')) {
             const blob = item.getAsFile();
-            
-            // 核心黑科技：利用 DataTransfer 把粘贴的文件“塞”进 input[type=file]
             const dataTransfer = new DataTransfer();
             dataTransfer.items.add(blob);
             imageInput.files = dataTransfer.files;
-            
-            // 显示预览
             showPreview(blob);
-            
-            // 提示用户
-            // alert("已检测到截图，图片已就绪！"); 
-            return; // 处理完图片就停止，避免重复处理
+            return; 
         }
     }
 });
@@ -122,9 +115,7 @@ document.getElementById("recognizeBtn").addEventListener("click", async () => {
         loadingText.innerText = "正在识别图片中的文字...";
 
         const base64Image = await convertToBase64(imageInput.files[0]);
-        
         const ocrPrompt = "请作为一个高精度的OCR工具。请准确识别这张图片中的所有文字内容。如果是数学公式，请尽量用标准文本或LaTeX表示。直接输出识别内容，不需要任何开场白或结束语。";
-
         let model = modelSelect.value === 'custom' ? document.getElementById("customModelInput").value : modelSelect.value;
 
         const content = await callAiApi(apiKey, model, [
@@ -140,7 +131,6 @@ document.getElementById("recognizeBtn").addEventListener("click", async () => {
         if (content) {
             questionInput.value = content.trim();
         }
-
     } catch (e) {
         console.error(e);
         alert("识别失败：" + e.message);
@@ -185,7 +175,9 @@ document.getElementById("generateBtn").addEventListener("click", async () => {
 
         const hasImage = imageInput.files.length > 0;
         
-        // 核心 Prompt (根据您的最新要求进行了修改)
+        // ==========================================
+        // 核心 Prompt：根据您的要求深度定制
+        // ==========================================
         const basePrompt = `
 假设听众是刚接触这个知识、基础一般、容易紧张的六年级学生。
 请对下面的【原题】做“审题 + 解题”完整拆解，并基于同一知识点自动生成配套练习。
@@ -204,7 +196,7 @@ ${questionText}
 【一、原题速读】
 1. 请先用口语化的方式复述一遍题目。
 2. 然后告诉孩子：“这其实是在考我们 XX（数学/英语）的哪个知识点”。
-3. **重要：** 请务必将具体的**知识点名称**用 <span class="key-word">知识点名称</span> 包裹，使其显示为紫色高亮。
+3. **重要指令：** 请务必将本题考察的**知识点名称**用 <span class="key-word">知识点名称</span> 包裹，使其在网页上显示为紫色高亮。
    示例：这其实是在考我们小学数学里一个非常重要的知识点——<span class="key-word">百分数的理解和比较</span>。
 
 【审题结构】
@@ -231,7 +223,7 @@ ${questionText}
 每一步必须使用这样的格式（注意三行）：
 ①（这一小步要做什么，用口语说给孩子听，加入鼓励语句）
 ②（写出算式或画图说明）
-③（**请用括号包裹**，用 1 句话解释“为什么要这样做，这一步对应了我们在隐藏条件中讲的哪个**基础概念**”）
+③（**必须用括号包裹**：用 1 句话解释“为什么要这样做，这一步对应了我们在隐藏条件中讲的哪个**基础概念**”）
    示例格式：③（这一步是用到了“路程=速度x时间”这个公式）
 
 【重点标注规则（英+数统一风格）】
@@ -310,7 +302,9 @@ ${questionText}
             String(now.getDate()).padStart(2, "0");
         const newFileName = `${filenameKeyword}_${dateDownloadStr}.html`;
 
-        // 【更新 CSS 样式：使用您上传的 HTML 中的白底极简风格】
+        // ==========================================
+        // HTML 模板：CSS 已同步为您提供的白底极简风格
+        // ==========================================
         const fullHtml = `<!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -355,36 +349,31 @@ body {
     color: #666;
 }
 
-/* 内容块样式 - 移除背景色和阴影，保留左侧边条和更多留白 */
+/* 内容块样式 - 极简白底 */
 .block {
     border-radius: 8px;
     padding: 15px;
-    margin-bottom: 30px; /* 增加区块间距 */
-    background: #ffffff; /* 统一白色背景，减轻视觉负担 */
+    margin-bottom: 30px; 
+    background: #ffffff; 
     box-shadow: none;
-    border: 1px solid #f0f0f0; /* 极浅边框，仅用于区隔 */
+    border: 1px solid #f0f0f0; 
 }
-/* 仅用左侧边条区分区块类型 */
+/* 左侧边条 */
 .block-reading { border-left: 5px solid #42a5f5; border-radius: 0 8px 8px 0; }
 .block-solution { border-left: 5px solid #66bb6a; border-radius: 0 8px 8px 0; }
 .block-extra { border-left: 5px solid #ffa726; border-radius: 0 8px 8px 0; }
 .block-practice { border-left: 5px solid #8e24aa; border-radius: 0 8px 8px 0; }
 
 .highlight {
-    margin-top: 15px; /* 增加留白 */
+    margin-top: 15px;
     padding: 12px;
     border-radius: 6px;
     background: #fff9c4;
     border: 1px dashed #fbc02d;
 }
 
-/* 关键词“贴纸”样式 (增强版：增加边框) */
-.kw-subject,
-.kw-verb,
-.kw-time,
-.kw-number,
-.kw-relation,
-.kw-question {
+/* 关键词“贴纸”样式 */
+.kw-subject, .kw-verb, .kw-time, .kw-number, .kw-relation, .kw-question {
     display: inline-block;
     padding: 2px 6px;
     margin: 1px 2px;
@@ -403,12 +392,12 @@ body {
 .kw-relation{ background: #ffe0b2; color: #ef6c00; border-color: #ffb74d; }
 .kw-question{ background: #b2dfdb; color: #00897b; border-color: #4db6ac; }
 
-/* 关键字/知识点/基础概念高亮（最重要） */
+/* 关键字/知识点/基础概念高亮（紫色高亮） */
 .key-word {
     font-weight: bold;
-    color: #9c27b0; /* 紫色文字 */
-    background: #f3e5f5; /* 浅紫背景 */
-    border: 1px solid #ce93d8; /* 紫色边框 */
+    color: #9c27b0; 
+    background: #f3e5f5; 
+    border: 1px solid #ce93d8; 
     padding: 2px 4px;
     border-radius: 4px;
 }
@@ -420,48 +409,17 @@ body {
     padding-bottom: 1px;
 }
 
-/* 标题与列表 - 增加垂直留白 */
-h1, h2, h3, h4 {
-    margin: 6px 0;
-}
-h2 {
-    font-size: 18px;
-    color: #1e88e5;
-    border-bottom: 2px solid #1e88e5;
-    padding-bottom: 5px;
-    margin: 0 0 18px 0; /* 增加底部间距 */
-}
-h3 {
-    font-size: 16px;
-    color: #444;
-    margin: 20px 0 10px 0; /* 增加顶部和底部间距 */
-    font-weight: bold;
-}
-p {
-    margin: 8px 0; /* 增加段落间距 */
-    line-height: 1.7; /* 增加行高 */
-}
-ul {
-    margin: 10px 0 10px 25px; /* 增加列表垂直间距 */
-    padding: 0;
-    list-style-type: disc;
-}
-li {
-    margin-bottom: 8px; /* 增加列表项间距 */
-    line-height: 1.6;
-}
+/* 排版留白 */
+h1, h2, h3, h4 { margin: 6px 0; }
+h2 { font-size: 18px; color: #1e88e5; border-bottom: 2px solid #1e88e5; padding-bottom: 5px; margin: 0 0 18px 0; }
+h3 { font-size: 16px; color: #444; margin: 20px 0 10px 0; font-weight: bold; }
+p { margin: 8px 0; line-height: 1.7; }
+ul { margin: 10px 0 10px 25px; padding: 0; list-style-type: disc; }
+li { margin-bottom: 8px; line-height: 1.6; }
 
-/* 打印模式 */
 @media print {
-    body {
-        background: #ffffff;
-    }
-    .wrapper {
-        box-shadow: none;
-        padding: 0;
-        width: auto;
-    }
-    /* 强制打印背景和颜色 */
+    body { background: #ffffff; }
+    .wrapper { box-shadow: none; padding: 0; width: auto; }
     .block, .highlight, .key-word, 
     .kw-subject, .kw-verb, .kw-time, 
     .kw-number, .kw-relation, .kw-question {

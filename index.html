@@ -2,24 +2,23 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8" />
-    <title>牛爸小课堂 · 审题拆解工具 V1.9 (截图粘贴版)</title>
+    <title>牛爸小课堂 · 审题拆解工具 V2.0 (定制优化版)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="style.css" />
     <style>
-        /* 按钮样式微调 */
+        /* 局部样式：图片预览与按钮 */
         .btn-secondary { background: #6c757d; margin-top: 10px; }
         .btn-secondary:hover { background: #5a6268; }
         .btn-group { display: flex; gap: 10px; margin-top: 10px; }
         .btn-group button { margin-top: 0; flex: 1; }
         
-        /* 新增：图片预览区域样式 */
         .preview-box {
             margin-top: 10px;
             padding: 10px;
             border: 1px dashed #1e88e5;
             border-radius: 6px;
             background: #f0f8ff;
-            display: none; /* 默认隐藏，有图时显示 */
+            display: none; /* 默认隐藏 */
             text-align: center;
             position: relative;
         }
@@ -46,7 +45,7 @@
 </head>
 <body>
 
-    <h1>牛爸小课堂 · 审题拆解工具（V1.9：支持粘贴截图）</h1>
+    <h1>牛爸小课堂 · 审题拆解工具（V2.0：考点高亮版）</h1>
 
     <div class="container">
 
@@ -56,10 +55,11 @@
             <div style="margin-bottom: 15px;">
                 <label style="font-weight:bold; color:#333;">第一步：上传或粘贴图片</label>
                 <div style="font-size: 13px; color: #666; margin-bottom: 5px;">
-                    支持点击按钮上传，也支持 <span style="color:#d32f2f; font-weight:bold;">Ctrl+V 直接粘贴</span> 截图
+                    支持点击上传，或直接 <span style="color:#d32f2f; font-weight:bold;">Ctrl+V 粘贴</span> 截图
                 </div>
                 <input type="file" accept="image/*" id="imageInput">
                 
+                <!-- 图片预览区域 -->
                 <div id="previewBox" class="preview-box">
                     <div class="preview-close" id="clearImgBtn" title="删除图片">✕</div>
                     <img id="imagePreview" src="" alt="预览图">
@@ -67,6 +67,7 @@
                 </div>
             </div>
 
+            <!-- 按钮组 -->
             <div class="btn-group">
                 <button id="recognizeBtn" class="btn-secondary">👀 先识别文字 (可校验)</button>
             </div>
