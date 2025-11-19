@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8" />
+    <title>牛爸小课堂 · 审题拆解工具 V1.9 (截图粘贴版)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="style.css" />
+    <style>
+        /* 按钮样式微调 */
+        .btn-secondary { background: #6c757d; margin-top: 10px; }
+        .btn-secondary:hover { background: #5a6268; }
+        .btn-group { display: flex; gap: 10px; margin-top: 10px; }
+        .btn-group button { margin-top: 0; flex: 1; }
+        
+        /* 新增：图片预览区域样式 */
+        .preview-box {
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px dashed #1e88e5;
+            border-radius: 6px;
+            background: #f0f8ff;
+            display: none; /* 默认隐藏，有图时显示 */
+            text-align: center;
+            position: relative;
+        }
+        .preview-box img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .preview-close {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            line-height: 24px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>牛爸小课堂 · 审题拆解工具（V1.9：支持粘贴截图）</h1>
+
+    <div class="container">
+
+        <div class="input-area card">
+            <h2>① 题目来源</h2>
+            
+            <div style="margin-bottom: 15px;">
+                <label style="font-weight:bold; color:#333;">第一步：上传或粘贴图片</label>
+                <div style="font-size: 13px; color: #666; margin-bottom: 5px;">
+                    支持点击按钮上传，也支持 <span style="color:#d32f2f; font-weight:bold;">Ctrl+V 直接粘贴</span> 截图
+                </div>
+                <input type="file" accept="image/*" id="imageInput">
+                
+                <div id="previewBox" class="preview-box">
+                    <div class="preview-close" id="clearImgBtn" title="删除图片">✕</div>
+                    <img id="imagePreview" src="" alt="预览图">
+                    <div style="font-size:12px; color:#1e88e5; margin-top:4px;">图片已就绪</div>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button id="recognizeBtn" class="btn-secondary">👀 先识别文字 (可校验)</button>
+            </div>
+            
+            <div style="border-top: 1px dashed #ccc; padding-top: 15px; margin-top: 15px;">
+                <label style="font-weight:bold; color:#333;">第二步：确认/编辑题目文字</label>
+                <textarea id="questionInput" placeholder="识别后的文字会显示在这里，您也可以直接手动粘贴..."></textarea>
+            </div>
+        </div>
+
+        <div class="config-area card">
+            <h2>③ 配置与生成</h2>
+            <label>选择模型：</label>
+            <select id="modelSelect">
+                <option value="gpt-4o-mini">gpt-4o-mini (推荐/便宜)</option>
+                <option value="gpt-4o">gpt-4o (最强)</option>
+                <option value="gemini-2.0-flash">gemini-2.0-flash (速度快)</option>
+                <option value="claude-sonnet-4-20250514">claude-sonnet-4-20250514</option>
+                <option value="custom">自定义模型名称…</option>
+            </select>
+            <input id="customModelInput" placeholder="自定义模型名称">
+
+            <label>API Key：</label>
+            <input id="apiKeyInput" placeholder="只填 Key，本工具自动加 Bearer">
+
+            <button id="generateBtn">✨ 生成解析报告 HTML</button>
+            <p class="tip">
+                API Key 将自动保存在本地浏览器中。
+            </p>
+        </div>
+    </div>
+
+    <div class="loading-mask hidden" id="loadingMask">
+        <div class="loading-box">
+            <div class="spinner"></div>
+            <p class="loading-text">正在处理，请稍等...</p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
