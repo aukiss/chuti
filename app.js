@@ -1,21 +1,14 @@
-// 使用 localStorage 保存 API Key
-const API_KEY_STORAGE_KEY = "nb_exam_api_key_v20";
+// 注意：因为 Key 存储在服务器端，这里不再需要使用 localStorage 
+// const API_KEY_STORAGE_KEY = "nb_exam_api_key_v20"; 
+// window.addEventListener("DOMContentLoaded", ...) 的逻辑也已删除
 
-window.addEventListener("DOMContentLoaded", () => {
-    const savedKey = window.localStorage.getItem(API_KEY_STORAGE_KEY);
-    if (savedKey) {
-        document.getElementById("apiKeyInput").value = savedKey;
-    }
-});
-
-// --- 核心逻辑：处理图片预览和粘贴 ---
+// --- 核心逻辑：处理图片预览和粘贴 (保持不变) ---
 
 const imageInput = document.getElementById("imageInput");
 const previewBox = document.getElementById("previewBox");
 const imagePreview = document.getElementById("imagePreview");
 const clearImgBtn = document.getElementById("clearImgBtn");
 
-// 显示预览图
 function showPreview(file) {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -25,27 +18,23 @@ function showPreview(file) {
     reader.readAsDataURL(file);
 }
 
-// 清除图片
 clearImgBtn.addEventListener("click", () => {
-    imageInput.value = ""; // 清空 input
+    imageInput.value = "";
     previewBox.style.display = "none";
     imagePreview.src = "";
 });
 
-// 监听文件选择（点击上传）
 imageInput.addEventListener("change", (e) => {
     if (e.target.files && e.target.files[0]) {
         showPreview(e.target.files[0]);
     }
 });
 
-// 监听全局粘贴事件 (Ctrl+V)
 document.addEventListener('paste', (event) => {
     const items = (event.clipboardData || event.originalEvent.clipboardData).items;
     
     for (let index in items) {
         const item = items[index];
-        // 如果粘贴的是图片
         if (item.kind === 'file' && item.type.includes('image/')) {
             const blob = item.getAsFile();
             const dataTransfer = new DataTransfer();
@@ -57,7 +46,6 @@ document.addEventListener('paste', (event) => {
     }
 });
 
-// 辅助函数：将图片文件转换为 Base64
 const convertToBase64 = (file) => {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -67,13 +55,16 @@ const convertToBase64 = (file) => {
     });
 };
 
-// 通用 API 调用函数
-async function callAiApi(apiKey, model, messages) {
-    const response = await fetch("https://api.videocaptioner.cn/v1/chat/completions", {
+// ==========================================
+// 通用 API 调用函数 (已修改为调用 Netlify Function)
+// ==========================================
+async function callAiApi(model, messages) {
+    // 目标地址变更为 Netlify Function 的路径
+    const response = await fetch("/.netlify/functions/api-proxy", {
         method: "POST",
         headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer " + apiKey
+            "Content-Type": "application/json"
+            // 删除了 Authorization Header，因为 Key 在服务器端添加
         },
         body: JSON.stringify({
             model: model,
@@ -91,10 +82,9 @@ async function callAiApi(apiKey, model, messages) {
     return data.choices?.[0]?.message?.content;
 }
 
-// --- 功能 1: 识别图片文字 ---
+// --- 功能 1: 识别图片文字 (已移除 Key 相关的逻辑) ---
 document.getElementById("recognizeBtn").addEventListener("click", async () => {
     const questionInput = document.getElementById("questionInput");
-    const apiKey = document.getElementById("apiKeyInput").value.trim();
     const modelSelect = document.getElementById("modelSelect");
     const loadingMask = document.getElementById("loadingMask");
     const loadingText = document.querySelector(".loading-text");
@@ -103,12 +93,8 @@ document.getElementById("recognizeBtn").addEventListener("click", async () => {
         alert("请先上传或粘贴一张图片！");
         return;
     }
-    if (!apiKey) {
-        alert("请输入 API Key！");
-        return;
-    }
     
-    window.localStorage.setItem(API_KEY_STORAGE_KEY, apiKey);
+    // 注意：这里不再需要检查 Key
 
     try {
         loadingMask.classList.remove("hidden");
@@ -118,7 +104,8 @@ document.getElementById("recognizeBtn").addEventListener("click", async () => {
         const ocrPrompt = "请作为一个高精度的OCR工具。请准确识别这张图片中的所有文字内容。如果是数学公式，请尽量用标准文本或LaTeX表示。直接输出识别内容，不需要任何开场白或结束语。";
         let model = modelSelect.value === 'custom' ? document.getElementById("customModelInput").value : modelSelect.value;
 
-        const content = await callAiApi(apiKey, model, [
+        // 调用 callAiApi 时，不再传递 apiKey
+        const content = await callAiApi(model, [
             {
                 role: "user",
                 content: [
@@ -133,17 +120,16 @@ document.getElementById("recognizeBtn").addEventListener("click", async () => {
         }
     } catch (e) {
         console.error(e);
-        alert("识别失败：" + e.message);
+        alert("识别失败：" + e.message + "\n请确认您已在 Netlify 后台配置 API Key！");
     } finally {
         loadingMask.classList.add("hidden");
     }
 });
 
 
-// --- 功能 2: 生成解析报告 ---
+// --- 功能 2: 生成解析报告 (已移除 Key 相关的逻辑) ---
 document.getElementById("generateBtn").addEventListener("click", async () => {
     const questionText = document.getElementById("questionInput").value.trim();
-    const apiKey = document.getElementById("apiKeyInput").value.trim();
     const modelSelect = document.getElementById("modelSelect");
     const customModelInput = document.getElementById("customModelInput");
     const loadingMask = document.getElementById("loadingMask");
@@ -153,12 +139,8 @@ document.getElementById("generateBtn").addEventListener("click", async () => {
         alert("题目文字不能为空！请先上传图片识别，或者手动输入文字。");
         return;
     }
-    if (!apiKey) {
-        alert("请输入 API Key！");
-        return;
-    }
 
-    window.localStorage.setItem(API_KEY_STORAGE_KEY, apiKey);
+    // 注意：这里不再需要检查 Key
 
     let model = modelSelect.value;
     if (model === "custom") {
@@ -175,9 +157,7 @@ document.getElementById("generateBtn").addEventListener("click", async () => {
 
         const hasImage = imageInput.files.length > 0;
         
-        // ==========================================
-        // 核心 Prompt：根据您的要求深度定制
-        // ==========================================
+        // 核心 Prompt (保持不变)
         const basePrompt = `
 假设听众是刚接触这个知识、基础一般、容易紧张的六年级学生。
 请对下面的【原题】做“审题 + 解题”完整拆解，并基于同一知识点自动生成配套练习。
@@ -279,7 +259,8 @@ ${questionText}
             messages = [{ role: "user", content: basePrompt }];
         }
 
-        const innerHtml = await callAiApi(apiKey, model, messages);
+        // 调用 callAiApi 时，不再传递 apiKey
+        const innerHtml = await callAiApi(model, messages);
 
         if (!innerHtml) {
             throw new Error("生成内容为空");
@@ -302,9 +283,6 @@ ${questionText}
             String(now.getDate()).padStart(2, "0");
         const newFileName = `${filenameKeyword}_${dateDownloadStr}.html`;
 
-        // ==========================================
-        // HTML 模板：CSS 已同步为您提供的白底极简风格
-        // ==========================================
         const fullHtml = `<!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -452,7 +430,8 @@ li { margin-bottom: 8px; line-height: 1.6; }
 
     } catch (e) {
         console.error("调用出错：", e);
-        alert("发生错误：" + e.message + "\\n请检查 API Key 或模型是否支持图片输入。");
+        // 提醒用户配置 Key
+        alert("发生错误：" + e.message + "\n\n🚨 提示：请确保您已在 Netlify 后台配置了环境变量 OPENAI_API_KEY。");
     } finally {
         loadingMask.classList.add("hidden");
     }
