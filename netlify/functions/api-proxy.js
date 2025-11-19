@@ -15,14 +15,14 @@ exports.handler = async function(event, context) {
         const requestBody = JSON.parse(event.body);
 
         // 4. 这里的地址换成您原本使用的中转地址
-        const targetUrl = "https://api.videocaptioner.cn/v1";
+        const targetUrl = "https://api.videocaptioner.cn/v1/chat/completions";
 
         // 5. 由服务器发起真正的请求（这一步用户是看不见的）
         const response = await fetch(targetUrl, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${sk-4X8iy9p8g4hNAaByXHCigQXE91KvC9VqzAWrQmKAXVlfgyUD}` // Key 在这里安全地加上
+                "Authorization": `Bearer ${API_KEY}` // Key 在这里安全地加上
             },
             body: JSON.stringify(requestBody)
         });
